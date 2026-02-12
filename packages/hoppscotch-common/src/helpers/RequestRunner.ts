@@ -28,6 +28,7 @@ import { runPreRequestScript, runTestScript } from "@hoppscotch/js-sandbox/web"
 import { useSetting } from "~/composables/settings"
 import { getService } from "~/modules/dioc"
 import { stripModulePrefix } from "~/helpers/scripting"
+import { sandboxError$ } from "~/helpers/sandbox-errors"
 import { createHoppFetchHook } from "~/helpers/hopp-fetch"
 import { KernelInterceptorService } from "~/services/kernel-interceptor.service"
 import {
@@ -369,6 +370,17 @@ const delegatePreRequestScriptRunner = (
   const { preRequestScript } = request
 
   const cleanScript = stripModulePrefix(preRequestScript)
+
+  // Short-circuit empty scripts to avoid unnecessary WASM initialization
+  if (cleanScript.trim().length === 0) {
+    return Promise.resolve(
+      E.right({
+        updatedEnvs: envs,
+        updatedCookies: cookies,
+      })
+    )
+  }
+
   if (!EXPERIMENTAL_SCRIPTING_SANDBOX.value) {
     // Strip `export {};\n` before executing in legacy sandbox to prevent syntax errors
 
@@ -399,6 +411,19 @@ const runPostRequestScript = (
   const { testScript } = request
 
   const cleanScript = stripModulePrefix(testScript)
+
+  // Short-circuit empty scripts to avoid unnecessary WASM initialization
+  if (cleanScript.trim().length === 0) {
+    return Promise.resolve(
+      E.right({
+        tests: { descriptor: "root", expectResults: [], children: [] },
+        envs,
+        consoleEntries: [],
+        updatedCookies: cookies,
+      } satisfies SandboxTestResult)
+    )
+  }
+
   if (!EXPERIMENTAL_SCRIPTING_SANDBOX.value) {
     // Strip `export {};\n` before executing in legacy sandbox to prevent syntax errors
 
@@ -481,7 +506,12 @@ export function runRESTRequest$(
     if (cancelCalled) return E.left("cancellation" as const)
 
     if (E.isLeft(preRequestScriptResult)) {
-      console.error(preRequestScriptResult.left)
+      console.error("[Pre-Request Script Error]", preRequestScriptResult.left)
+      sandboxError$.next({
+        error: preRequestScriptResult.left.slice(0, 200),
+        phase: "pre-request",
+        experimentalSandbox: EXPERIMENTAL_SCRIPTING_SANDBOX.value,
+      })
       return E.left("script_fail" as const)
     }
 
@@ -613,6 +643,16 @@ export function runRESTRequest$(
               cookieJarService.cookieJar.value = newCookieMap
             }
           } else {
+            console.error(
+              "[Post-Request Script Error]",
+              postRequestScriptResult.left
+            )
+            sandboxError$.next({
+              error: postRequestScriptResult.left.slice(0, 200),
+              phase: "post-request",
+              experimentalSandbox: EXPERIMENTAL_SCRIPTING_SANDBOX.value,
+            })
+
             tab.value.document.testResults = {
               description: "",
               expectResults: [],
@@ -798,7 +838,12 @@ export async function runTestRunnerRequest(
     cookieJarEntries
   ).then(async (preRequestScriptResult) => {
     if (E.isLeft(preRequestScriptResult)) {
-      console.error(preRequestScriptResult.left)
+      console.error("[Pre-Request Script Error]", preRequestScriptResult.left)
+      sandboxError$.next({
+        error: preRequestScriptResult.left.slice(0, 200),
+        phase: "pre-request",
+        experimentalSandbox: EXPERIMENTAL_SCRIPTING_SANDBOX.value,
+      })
       return E.left("script_fail" as const)
     }
 
@@ -904,6 +949,18 @@ export async function runTestRunnerRequest(
               updatedRequest: finalRequest,
             })
           }
+
+          // Post-request script failed
+          console.error(
+            "[Post-Request Script Error]",
+            postRequestScriptResult.left
+          )
+          sandboxError$.next({
+            error: postRequestScriptResult.left.slice(0, 200),
+            phase: "post-request",
+            experimentalSandbox: EXPERIMENTAL_SCRIPTING_SANDBOX.value,
+          })
+
           const sandboxTestResult = {
             description: "",
             expectResults: [],
@@ -935,6 +992,7 @@ export async function runTestRunnerRequest(
       return requestResult
     }
 
+    console.error("[Request Error] Stream completed without emitting a result")
     return E.left("script_fail")
   })
 }

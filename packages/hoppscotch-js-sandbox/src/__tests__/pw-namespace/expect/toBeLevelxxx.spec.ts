@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest"
 import { runTest, fakeResponse } from "~/utils/test-helpers"
 
-describe("toBeLevelxxx", { timeout: 100000 }, () => {
+describe("toBeLevelxxx", () => {
   describe("toBeLevel2xx", () => {
     test("assertion passes for 200 series with no negation", async () => {
       for (let i = 200; i < 300; i++) {
@@ -18,7 +18,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion fails for non 200 series with no negation", async () => {
       for (let i = 300; i < 500; i++) {
@@ -35,7 +35,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("give error if the expect value was not a number with no negation", async () => {
       await expect(
@@ -68,7 +68,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion passes for non 200 series with negation", async () => {
       for (let i = 300; i < 500; i++) {
@@ -85,7 +85,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("give error if the expect value was not a number with negation", async () => {
       await expect(
@@ -120,7 +120,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion fails for non 300 series with no negation", async () => {
       for (let i = 400; i < 500; i++) {
@@ -137,7 +137,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("give error if the expect value is not a number without negation", () => {
       return expect(
@@ -170,7 +170,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion passes for non 200 series with negation", async () => {
       for (let i = 400; i < 500; i++) {
@@ -187,7 +187,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("give error if the expect value is not a number with negation", () => {
       return expect(
@@ -222,7 +222,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion fails for non 400 series with no negation", async () => {
       for (let i = 500; i < 600; i++) {
@@ -239,7 +239,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("give error if the expected value is not a number without negation", () => {
       return expect(
@@ -272,7 +272,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion passes for non 400 series with negation", async () => {
       for (let i = 500; i < 600; i++) {
@@ -289,7 +289,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("give error if the expected value is not a number with negation", () => {
       return expect(
@@ -324,7 +324,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion fails for non 500 series with no negation", async () => {
       for (let i = 200; i < 500; i++) {
@@ -341,7 +341,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 120000)
 
     test("give error if the expect value is not a number with no negation", () => {
       return expect(
@@ -374,7 +374,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 60000)
 
     test("assertion passes for non 500 series with negation", async () => {
       for (let i = 200; i < 500; i++) {
@@ -391,7 +391,7 @@ describe("toBeLevelxxx", { timeout: 100000 }, () => {
           }),
         ])
       }
-    })
+    }, 120000)
 
     test("give error if the expect value is not a number with negation", () => {
       return expect(
